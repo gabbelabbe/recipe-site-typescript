@@ -1,16 +1,19 @@
 export interface Group {
   uid: string;
   groupName: string,
-  groupUid: string,
   groupMembers: User[]
 }
 
 export interface User {
+  email: string,
+  uid: string
+}
+
+export interface LoggedInUser {
   displayName: string,
   email: string,
   uid: string,
   selectedDate: Date,
-  groupsUids: string[],
   selectedGroup: Group | null
 }
 
@@ -33,7 +36,7 @@ export const CHANGE_SELECTED_GROUP = 'CHANGE_SELECTED_GROUP';
 
 interface LoginAction {
   type: typeof LOGIN,
-  payload: User
+  payload: LoggedInUser
 }
 
 interface LogoutAction {

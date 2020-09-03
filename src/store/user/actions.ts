@@ -3,7 +3,7 @@ import {
   LOGOUT, 
   CHANGE_DATE,
   CHANGE_SELECTED_GROUP,
-  User, 
+  LoggedInUser, 
   UserActionTypes,
   SET_GROUPS,
   CLEAR_GROUPS,
@@ -11,7 +11,7 @@ import {
   GroupsActionTypes,
 } from './types';
 
-export function login(user: User): UserActionTypes {
+export function login(user: LoggedInUser): UserActionTypes {
   return {
     type: LOGIN,
     payload: user

@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import './App.css';
 import { auth, firestore } from './firebase';
 import { useDispatch } from 'react-redux';
-import { User } from './store/user/types';
+import { LoggedInUser } from './store/user/types';
 import Header from './components/Header';
 import AddNewRecipeButton from './components/AddNewRecipeButton';
 
@@ -12,16 +12,29 @@ function App() {
   const db = firestore();
 
   let groupsRef;
+  let userRef: firebase.firestore.CollectionReference<firebase.firestore.DocumentData> | undefined;
   let unsubscribe: undefined | Function;
 
   auth().onAuthStateChanged(async user => {
     if(user) {
-      const userInfo: User = {displayName: user.displayName!, email: user.email!, uid: user.uid!, selectedDate: new Date(), groupsUids: [], selectedGroup: null};
+      const userInfo: LoggedInUser = {displayName: user.displayName!, email: user.email!, uid: user.uid!, selectedDate: new Date(), selectedGroup: null};
       await dispatch({type: 'LOGIN', payload: userInfo});
+
+      userRef = db.collection('users');
+
+      userRef.doc(user.uid).get()
+        .then(querySnapshot => {
+          if (!querySnapshot.exists) {
+            userRef!.doc(user.uid).set({
+              email: user.email,
+              uid: user.uid,
+            })
+          }
+        })
 
       groupsRef = db.collection('groups');
 
-      unsubscribe = groupsRef
+      unsubscribe = await groupsRef
         .where('groupMembers', 'array-contains', user.uid)
         .onSnapshot(querySnapshot => {
             const groups = querySnapshot.docs.map(doc => {

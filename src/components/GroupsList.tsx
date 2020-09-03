@@ -61,7 +61,7 @@ export default function GroupsList({ open, setOpen }: GroupsListProps) {
   }
 
   useEffect(() => {
-    if(groupsState) {
+    if (groupsState) {
       generateGroupCards();
     }
   }, [groupsState]);

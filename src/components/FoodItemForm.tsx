@@ -41,6 +41,9 @@ const useStyles = makeStyles((theme) => ({
   fileInput: {
     display: 'none',
   },
+  label: {
+    color: 'white'
+  }
 }));
 
 export default function FoodItemForm({ open, setOpen, recipeInfo }: FoodItemFormType) {
@@ -75,7 +78,7 @@ export default function FoodItemForm({ open, setOpen, recipeInfo }: FoodItemForm
           <TextField
             margin='dense'
             id='foodItem'
-            placeholder={recipeInfo ? (recipeInfo.foodItem) : ('Maträtt')}
+            label={recipeInfo ? (recipeInfo.foodItem) : ('Maträtt')}
             type='text'
             fullWidth
             InputProps={{
@@ -86,12 +89,13 @@ export default function FoodItemForm({ open, setOpen, recipeInfo }: FoodItemForm
             onChange={(e) => {
               setNewFoodItem(e.target.value);
             }}
+            InputLabelProps={{className: classes.label}}
           />
           <div className={classes.linkImageGrid}>
             <TextField
               margin='dense'
               id='recipeLink'
-              placeholder={!!recipeInfo ? (recipeInfo.recipeLink) : ('Länk till receptet')}
+              label={!!recipeInfo ? (recipeInfo.recipeLink) : ('Länk till receptet')}
               type='text'
               fullWidth
               style={{
@@ -106,6 +110,7 @@ export default function FoodItemForm({ open, setOpen, recipeInfo }: FoodItemForm
                 setNewRecipeLink(e.target.value);
               }}
               className={classes.input}
+              InputLabelProps={{className: classes.label}}
             />
             <Divider className={classes.divider} orientation='vertical' />
             <input accept='image/*' className={classes.fileInput} id='icon-button-file' type='file' />

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { User } from '../store/user/types';
+import { LoggedInUser } from '../store/user/types';
 import { RootState } from '../store/index';
 import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
@@ -40,7 +40,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function Header() {
-  const userState = useSelector<RootState, User | null>((state: RootState) => state.user);
+  const userState = useSelector<RootState, LoggedInUser | null>((state: RootState) => state.user);
   const dispatch = useDispatch();
 
   const classes = useStyles();

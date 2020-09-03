@@ -1,5 +1,5 @@
 import {
-  User,
+  LoggedInUser,
   LOGIN,
   LOGOUT,
   CHANGE_DATE,
@@ -11,13 +11,13 @@ import {
   CHANGE_SELECTED_GROUP
 } from './types';
 
-const initialUserState: User | null = null;
+const initialUserState: LoggedInUser | null = null;
 const initialGroupsState: Group[] | null = null;
 
 export function userReducer(
   state = initialUserState,
   action: UserActionTypes
-): User | null {
+): LoggedInUser | null {
   switch (action.type) {
     case LOGIN:
       return action.payload;
