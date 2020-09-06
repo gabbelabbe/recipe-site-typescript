@@ -33,6 +33,12 @@ const useStyles = makeStyles((theme) => ({
   },
   label: {
     color: 'white'
+  },
+  helperText: {
+    color: 'white'
+  },
+  helperTextError: {
+    color: '#f44336'
   }
 }));
 
@@ -45,31 +51,52 @@ export default function GroupForm({ setShowCreateGroupForm, groupToBeEdited }: G
   const classes = useStyles();
 
   const [groupMembers, setGroupMemebers] = useState<User[]>([]);
+  const [numberOfMembers, setNumberOfMembers] = useState(groupToBeEdited ? groupToBeEdited.groupMembers.length : 2);
 
   useEffect(() => {
-    let tempArr: User[] = [{uid: userState!.uid, email: userState!.email}];
-    if (groupToBeEdited && groupToBeEdited.groupMembers[0].uid !== userState!.uid) {
-      tempArr = groupToBeEdited.groupMembers;
-      for (let i = 0; i < tempArr.length; i++) {
-        if (tempArr[i].uid === userState!.uid) {
-          const first = tempArr[0];
-          tempArr[0] = tempArr[i];
-          tempArr[i] = first;
+    const generateGroupMembers = async () => {
+      let tempArr: User[] = groupMembers.length > 0 ? [...groupMembers] : [{uid: userState!.uid, email: userState!.email}];
+      if (groupToBeEdited && groupToBeEdited.groupMembers[0].uid !== userState!.uid) {
+        // This makes sure that the logged in user is first in the array.
+        tempArr = [...groupToBeEdited.groupMembers];
+        for (let i = 0; i < tempArr.length; i++) {
+          if (tempArr[i].uid === userState!.uid) {
+            const first = tempArr[0];
+            tempArr[0] = tempArr[i];
+            tempArr[i] = first;
+          }
+        }
+      } else if (tempArr.length < numberOfMembers) {
+        for (let i = tempArr.length; i < numberOfMembers; i++) {
+          tempArr.push({uid: '', email: ''});
+        }
+      } else if (tempArr.length > numberOfMembers) {
+        for (let i = tempArr.length; i > numberOfMembers; i--) {
+          tempArr.pop();
         }
       }
+      await setGroupMemebers(tempArr);
     }
-    setGroupMemebers(tempArr);
-  }, [groupToBeEdited]);
+    generateGroupMembers();
+    console.log(groupMembers);
+  }, [numberOfMembers]);
 
   const [newGroupName, setNewGroupName] = useState(groupToBeEdited ? groupToBeEdited.groupName : '');
-  const [numberOfMembers, setNumberOfMembers] = useState(groupToBeEdited ? groupToBeEdited.groupMembers.length : 2);
   const [emailErrors, setEmailErrors] = useState([false]);
-  const inputOtherMembers: JSX.Element[] = [
-    <TextField
+  const [userDontExistsArr, setUserDontExistsArr] = useState([false]);
+  const [inputOtherMembers, setInputOtherMembers] = useState<JSX.Element[]>([]);
+
+  useEffect(() => {
+    console.log(groupMembers);
+    setInputOtherMembers([<TextField
       margin='dense'
-      id={`${numberOfMembers - 1}`}
-      key={numberOfMembers - 1}
-      label='En användares mail'
+      id='1'
+      key={1}
+      label='En annan användares mail'
+      helperText={userDontExistsArr[0] ? ('Denna Användaren finns inte') : ('Du behöver inte lägga till sig själv.')}
+      FormHelperTextProps={{
+        className: userDontExistsArr[0] ? classes.helperTextError : classes.helperText
+      }}
       type='email'
       fullWidth
       error={emailErrors[0]}
@@ -79,28 +106,49 @@ export default function GroupForm({ setShowCreateGroupForm, groupToBeEdited }: G
         }
       }}
       onChange={(e) => {
-        handleEmailChange(parseInt(e.target.id) - 1, e.target.value)
+        handleEmailChange(parseInt(e.target.id) - 1, e.target.value);
       }}
       InputLabelProps={{className: classes.label}}
-    />
-  ];
+    />])
+  }, [groupMembers]);
 
-  useEffect(() => {
-    console.log(emailErrors[0])
-    console.log(inputOtherMembers[0]);
-  }, [emailErrors]);
+  function generateInputOtherMembers() {
 
-  function handleEmailChange(id: number, email: string) {
-    const tempArr = [...emailErrors];
-    console.log(email)
-    tempArr[id] = !validateEmail(email);
-    console.log(tempArr);
-    setEmailErrors(tempArr);
+  }
+
+  async function handleEmailChange(id: number, email: string) {
+    const tempGroupMembersArr = [...groupMembers];
+    tempGroupMembersArr[id + 1].email = email; 
+    setGroupMemebers(tempGroupMembersArr);
+
+    const tempUserDontExistsArr = [...userDontExistsArr];
+    const tempEmailErrorArr = [...emailErrors];
+    tempEmailErrorArr[id] = !validateEmail(email);
+    
+    if (!tempEmailErrorArr[id]) {
+      usersRef = db.collection('users');
+      
+      await usersRef.where('email', '==', email).get()
+        .then(querySnapshot => {
+          if (querySnapshot.docs[0]) {
+            console.log(querySnapshot.docs[0].data());
+            tempUserDontExistsArr[id] = false;
+          } else {
+            tempUserDontExistsArr[id] = true;
+            tempEmailErrorArr[id] = true;
+          }
+        })
+        .catch(err => console.error(err));
+
+    }
+
+    setUserDontExistsArr(tempUserDontExistsArr);
+    setEmailErrors(tempEmailErrorArr);
   }
 
   function validateEmail(email: string): boolean {
-    const re: RegExp = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return re.test(email);
+    const re: RegExp = /^(([^<>()[\]\\.,;:\s@]+(\.[^<>()[\]\\.,;:\s@]+)*)|(.+))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(email) && email !== userState!.email;
   }
 
   return (
@@ -126,9 +174,9 @@ export default function GroupForm({ setShowCreateGroupForm, groupToBeEdited }: G
         <TextField 
           margin='dense'
           id='numberOfOtherUsers'
-          label='Antal i Gruppen'
+          label='Antal i Gruppen, inklusive dig själv'
           type='number'
-          value={groupToBeEdited ? (groupToBeEdited.groupMembers.length) : (numberOfMembers)}
+          value={numberOfMembers}
           inputProps={{min: 2, max: 10}}
           fullWidth
           InputProps={{
