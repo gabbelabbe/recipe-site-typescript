@@ -10,9 +10,26 @@ import TextField from '@material-ui/core/TextField';
 import { GroupsFormProps } from '../store/user/types';
 import IconButton from '@material-ui/core/Button';
 import CloseIcon from '@material-ui/icons/Close';
+import AddCircleOutlinedIcon from '@material-ui/icons/AddCircleOutlined';
+import Button from '@material-ui/core/Button';
+import Tooltip from '@material-ui/core/Tooltip';
+import AddIcon from '@material-ui/icons/Add';
+import * as EmailValidator from 'email-validator';
+import Paper from '@material-ui/core/Paper';
+import InputBase from '@material-ui/core/InputBase';
+import Divider from '@material-ui/core/Divider';
+import DeleteIcon from '@material-ui/icons/Delete';
 
 const useStyles = makeStyles((theme) => ({
   input: {
+    color: 'white'
+  },
+  inputOtherMembers: {
+    marginLeft: theme.spacing(1),
+    flex: 1,
+    '&::placeholder': {
+      color: 'white'
+    },
     color: 'white'
   },
   root: {
@@ -37,128 +54,61 @@ const useStyles = makeStyles((theme) => ({
   helperText: {
     color: 'white'
   },
-  helperTextError: {
-    color: '#f44336'
-  }
+  divider: {
+    height: 28,
+    margin: 4,
+  },
+  rootInputOtherMembers: {
+    display: 'flex',
+    alignItems: 'center',
+    width: 'auto',
+    backgroundColor: 'transparent'
+  },
 }));
 
 export default function GroupForm({ setShowCreateGroupForm, groupToBeEdited }: GroupsFormProps) {
   const userState = useSelector<RootState, LoggedInUser | null>((state: RootState) => state.user);
-  let usersRef: firebase.firestore.CollectionReference<firebase.firestore.DocumentData> | undefined;
+  let userRef: firebase.firestore.CollectionReference<firebase.firestore.DocumentData> | undefined;
   const dispatch = useDispatch();
   const db = firestore();
 
   const classes = useStyles();
+  const [groupName, setGroupName] = useState('');
+  const [groupMembers, setGroupMembers] = useState<User[]>([{email: '', uid: ''}]);
 
-  const [groupMembers, setGroupMemebers] = useState<User[]>([]);
-  const [numberOfMembers, setNumberOfMembers] = useState(groupToBeEdited ? groupToBeEdited.groupMembers.length : 2);
+  const handleEmailChange = (email: string, id: number) => {
+    const tempGroupMembers = groupMembers.map((member) => {return member});
+    tempGroupMembers[id] = {email: email, uid: ''};
+    if (EmailValidator.validate(email) && userState!.email !== email) {
+      userRef = db.collection('users');
 
-  useEffect(() => {
-    const generateGroupMembers = async () => {
-      let tempArr: User[] = groupMembers.length > 0 ? [...groupMembers] : [{uid: userState!.uid, email: userState!.email}];
-      if (groupToBeEdited && groupToBeEdited.groupMembers[0].uid !== userState!.uid) {
-        // This makes sure that the logged in user is first in the array.
-        tempArr = [...groupToBeEdited.groupMembers];
-        for (let i = 0; i < tempArr.length; i++) {
-          if (tempArr[i].uid === userState!.uid) {
-            const first = tempArr[0];
-            tempArr[0] = tempArr[i];
-            tempArr[i] = first;
-          }
-        }
-      } else if (tempArr.length < numberOfMembers) {
-        for (let i = tempArr.length; i < numberOfMembers; i++) {
-          tempArr.push({uid: '', email: ''});
-        }
-      } else if (tempArr.length > numberOfMembers) {
-        for (let i = tempArr.length; i > numberOfMembers; i--) {
-          tempArr.pop();
-        }
-      }
-      await setGroupMemebers(tempArr);
-    }
-    generateGroupMembers();
-    console.log(groupMembers);
-  }, [numberOfMembers]);
-
-  const [newGroupName, setNewGroupName] = useState(groupToBeEdited ? groupToBeEdited.groupName : '');
-  const [emailErrors, setEmailErrors] = useState([false]);
-  const [userDontExistsArr, setUserDontExistsArr] = useState([false]);
-  const [inputOtherMembers, setInputOtherMembers] = useState<JSX.Element[]>([]);
-
-  useEffect(() => {
-    console.log(groupMembers);
-    setInputOtherMembers([<TextField
-      margin='dense'
-      id='1'
-      key={1}
-      label='En annan användares mail'
-      helperText={userDontExistsArr[0] ? ('Denna Användaren finns inte') : ('Du behöver inte lägga till sig själv.')}
-      FormHelperTextProps={{
-        className: userDontExistsArr[0] ? classes.helperTextError : classes.helperText
-      }}
-      type='email'
-      fullWidth
-      error={emailErrors[0]}
-      InputProps={{
-        style: {
-          color: '#fff'
-        }
-      }}
-      onChange={(e) => {
-        handleEmailChange(parseInt(e.target.id) - 1, e.target.value);
-      }}
-      InputLabelProps={{className: classes.label}}
-    />])
-  }, [groupMembers]);
-
-  function generateInputOtherMembers() {
-
-  }
-
-  async function handleEmailChange(id: number, email: string) {
-    const tempGroupMembersArr = [...groupMembers];
-    tempGroupMembersArr[id + 1].email = email; 
-    setGroupMemebers(tempGroupMembersArr);
-
-    const tempUserDontExistsArr = [...userDontExistsArr];
-    const tempEmailErrorArr = [...emailErrors];
-    tempEmailErrorArr[id] = !validateEmail(email);
-    
-    if (!tempEmailErrorArr[id]) {
-      usersRef = db.collection('users');
-      
-      await usersRef.where('email', '==', email).get()
+      userRef.where('email', '==', email).get()
         .then(querySnapshot => {
-          if (querySnapshot.docs[0]) {
-            console.log(querySnapshot.docs[0].data());
-            tempUserDontExistsArr[id] = false;
-          } else {
-            tempUserDontExistsArr[id] = true;
-            tempEmailErrorArr[id] = true;
+          if (querySnapshot.docs.length > 0) {
+            tempGroupMembers[id].uid = querySnapshot.docs[0].data().uid;
           }
         })
-        .catch(err => console.error(err));
-
     }
-
-    setUserDontExistsArr(tempUserDontExistsArr);
-    setEmailErrors(tempEmailErrorArr);
+    setGroupMembers(tempGroupMembers);
   }
 
-  function validateEmail(email: string): boolean {
-    const re: RegExp = /^(([^<>()[\]\\.,;:\s@]+(\.[^<>()[\]\\.,;:\s@]+)*)|(.+))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return re.test(email) && email !== userState!.email;
-  }
+  const handleRemoveClick = (index: number) => {
+    const list = [...groupMembers];
+    list.splice(index, 1);
+    setGroupMembers(list);
+  };
 
+  const handleCreateGroup = () => {
+    console.log('Creating Group...');
+  }
+  
   return (
     <div>
       <DialogContent>
-        <TextField
+        <TextField 
           margin='dense'
           id='groupName'
-          label='Namn på Gruppen'
-          value={newGroupName}
+          label={groupToBeEdited ? (groupToBeEdited.groupName) : ('Gruppens Namn')}
           type='text'
           fullWidth
           InputProps={{
@@ -166,42 +116,59 @@ export default function GroupForm({ setShowCreateGroupForm, groupToBeEdited }: G
               color: '#fff'
             }
           }}
-          onChange={(e) => {
-            setNewGroupName(e.target.value);
-          }}
+          onChange={(e) => setGroupName(e.target.value)}
           InputLabelProps={{className: classes.label}}
         />
-        <TextField 
-          margin='dense'
-          id='numberOfOtherUsers'
-          label='Antal i Gruppen, inklusive dig själv'
-          type='number'
-          value={numberOfMembers}
-          inputProps={{min: 2, max: 10}}
-          fullWidth
-          InputProps={{
-            style: {
-              color: '#fff'
-            }
+        {groupMembers.map((member, i) => {
+          return (
+            <Paper component="form" className={classes.rootInputOtherMembers} key={i} elevation={0}>
+              <InputBase
+                className={classes.inputOtherMembers}
+                id={`${i}`}
+                placeholder={groupToBeEdited ? (groupToBeEdited.groupName) : ('Gruppens Namn')}
+                margin='dense'
+                type='text'
+                value={member.email}
+                onChange={(e) => handleEmailChange(e.target.value, i)}
+              />
+              <Divider className={classes.divider} orientation="vertical" />
+              <IconButton 
+                color="primary" 
+                className={classes.button} 
+                aria-label="directions"
+                onClick={() => handleRemoveClick(i)}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Paper>
+          );
+        })}
+        <Button
+          onClick={() => setGroupMembers([...groupMembers, {email: '', uid: ''}])}
+          style={{
+            backgroundColor: 'green',
+            marginTop: 5
           }}
-          onChange={(e) => {
-            setNumberOfMembers(parseInt(e.target.value));
-          }}
-          InputLabelProps={{className: classes.label}}
-        />
-        {inputOtherMembers}
+        >
+          <AddIcon />
+        </Button>
       </DialogContent>
       <DialogActions>
-        <IconButton 
-          onClick={() => {
-            setShowCreateGroupForm(false);
-          }}
+        <IconButton
+          onClick={() => setShowCreateGroupForm(false)}
           classes={{root: classes.root}}
           className={classes.button}
         >
           <CloseIcon />
         </IconButton>
+        <IconButton 
+          onClick={() => handleCreateGroup}
+          classes={{root: classes.root}}
+          className={classes.button}
+        >
+          <AddCircleOutlinedIcon />
+        </IconButton>
       </DialogActions>
     </div>
-  )
+  );
 }

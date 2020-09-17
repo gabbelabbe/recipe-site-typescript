@@ -95,7 +95,6 @@ export default function GroupsList({ open, setOpen }: GroupsListProps) {
               <IconButton 
                 onClick={() => {
                   setOpen(false);
-                  setShowCreateGroupForm(false);
                 }}
                 classes={{root: classes.root}}
                 className={classes.button}
