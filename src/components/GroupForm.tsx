@@ -12,13 +12,13 @@ import IconButton from '@material-ui/core/Button';
 import CloseIcon from '@material-ui/icons/Close';
 import AddCircleOutlinedIcon from '@material-ui/icons/AddCircleOutlined';
 import Button from '@material-ui/core/Button';
-import Tooltip from '@material-ui/core/Tooltip';
 import AddIcon from '@material-ui/icons/Add';
 import * as EmailValidator from 'email-validator';
 import Paper from '@material-ui/core/Paper';
 import InputBase from '@material-ui/core/InputBase';
 import Divider from '@material-ui/core/Divider';
 import DeleteIcon from '@material-ui/icons/Delete';
+import Typography from '@material-ui/core/Typography';
 
 const useStyles = makeStyles((theme) => ({
   input: {
@@ -119,13 +119,16 @@ export default function GroupForm({ setShowCreateGroupForm, groupToBeEdited }: G
           onChange={(e) => setGroupName(e.target.value)}
           InputLabelProps={{className: classes.label}}
         />
+        <Typography style={{paddingTop: 5}}>
+          Personer som du vill bjuda in till gruppen:
+        </Typography>
         {groupMembers.map((member, i) => {
           return (
             <Paper component="form" className={classes.rootInputOtherMembers} key={i} elevation={0}>
               <InputBase
                 className={classes.inputOtherMembers}
                 id={`${i}`}
-                placeholder={groupToBeEdited ? (groupToBeEdited.groupName) : ('Gruppens Namn')}
+                placeholder={member.email ? (member.email) : ('Mail till person')}
                 margin='dense'
                 type='text'
                 value={member.email}
@@ -162,7 +165,7 @@ export default function GroupForm({ setShowCreateGroupForm, groupToBeEdited }: G
           <CloseIcon />
         </IconButton>
         <IconButton 
-          onClick={() => handleCreateGroup}
+          onClick={() => handleCreateGroup()}
           classes={{root: classes.root}}
           className={classes.button}
         >
