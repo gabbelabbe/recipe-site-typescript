@@ -10,9 +10,10 @@ const useStyles = makeStyles((theme) => ({
     position: 'absolute',
     color: 'white',
     [theme.breakpoints.up('sm')]: {
-      top: '10px',
+      top: 10,
     },
-    top: '4px'
+    top: 4,
+    left: 0,
   },
 }));
 
@@ -22,16 +23,16 @@ export default function AddNewRecipe() {
 
   const handleClickOpen = () => {
     setOpen(true);
-  }
+  };
 
   return (
-    <div>
+    <>
       <Tooltip title='Se dina grupper'>
         <IconButton className={classes.absolute} onClick={handleClickOpen}>
           <GroupIcon color='inherit' />
         </IconButton>
       </Tooltip>
       <GroupsList open={open} setOpen={setOpen} />
-    </div>
-  )
+    </>
+  );
 }

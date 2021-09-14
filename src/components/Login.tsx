@@ -8,8 +8,8 @@ import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles((theme) => ({
   loginButton: {
-    color: 'white'
-  }
+    color: 'white',
+  },
 }));
 
 export default function Login() {
@@ -23,7 +23,11 @@ export default function Login() {
 
   return (
     <Tooltip title='Logga In'>
-      <IconButton edge='end' onClick={googleLogin} className={classes.loginButton}>
+      <IconButton
+        edge='end'
+        onClick={googleLogin}
+        className={classes.loginButton}
+      >
         <AccountCircleIcon color='inherit' />
       </IconButton>
     </Tooltip>

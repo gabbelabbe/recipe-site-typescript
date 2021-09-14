@@ -19,16 +19,20 @@ export default function AddNewRecipe() {
 
   const handleClickOpen = () => {
     setOpen(true);
-  }
+  };
 
   return (
-    <div>
+    <>
       <Tooltip title='Lägg till nytt recept' aria-label='add'>
-        <Fab style={{backgroundColor: 'green'}} className={classes.absolute} onClick={handleClickOpen}>
+        <Fab
+          style={{ backgroundColor: 'green' }}
+          className={classes.absolute}
+          onClick={handleClickOpen}
+        >
           <AddIcon />
         </Fab>
       </Tooltip>
       <FoodItemForm open={open} setOpen={setOpen} recipeInfo={null} />
-    </div>
-  )
+    </>
+  );
 }
