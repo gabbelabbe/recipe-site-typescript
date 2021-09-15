@@ -49,7 +49,7 @@ export default function Recipe({ recipe }: { recipe: RecipeType }) {
         setGroup(data.data());
       }
     })();
-  }, [recipe]);
+  }, [recipe, groupRef]);
 
   return (
     <Grid item xs={12} sm={8} md={6} lg={4}>

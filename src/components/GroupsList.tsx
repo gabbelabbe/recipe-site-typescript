@@ -38,7 +38,7 @@ export default function GroupsList({ open, setOpen }: GroupsListProps) {
 
   const classes = useStyles();
 
-  const [groupCards, setGroupsCards] = useState([]);
+  const [groupCards] = useState([]);
   const [showCreateGroupForm, setShowCreateGroupForm] = useState(false);
   const [groupToBeEdited, setGroupToBeEdited] = useState<null | Group>(null);
 
@@ -64,6 +64,7 @@ export default function GroupsList({ open, setOpen }: GroupsListProps) {
     if (groupsState) {
       generateGroupCards();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [groupsState]);
 
   return (

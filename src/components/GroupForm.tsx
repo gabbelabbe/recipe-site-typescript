@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { firestore } from '../firebase';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { User, LoggedInUser } from '../store/user/types';
 import { RootState } from '../store/index';
 import { makeStyles } from '@material-ui/core/styles';
@@ -76,7 +76,6 @@ export default function GroupForm({
   let userRef:
     | firebase.firestore.CollectionReference<firebase.firestore.DocumentData>
     | undefined;
-  const dispatch = useDispatch();
   const db = firestore();
 
   const classes = useStyles();
