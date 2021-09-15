@@ -8,7 +8,8 @@ import {
   SET_GROUPS,
   CLEAR_GROUPS,
   GroupsActionTypes,
-  CHANGE_SELECTED_GROUP
+  CHANGE_SELECTED_GROUP,
+  ADD_GROUP
 } from './types';
 
 const initialUserState: LoggedInUser | null = null;
@@ -39,6 +40,8 @@ export function groupsReducer(
   switch (action.type) {
     case SET_GROUPS:
       return action.payload;
+    case ADD_GROUP:
+      return [...(state ? state : []), action.payload];
     case CLEAR_GROUPS:
       return null;
     default:

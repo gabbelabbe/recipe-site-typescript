@@ -25,20 +25,22 @@ const useStyles = makeStyles((theme) => ({
   },
   button: {
     width: 24,
-    color: 'white'
+    color: 'white',
   },
   cardContent: {
     display: 'flex',
     flexDirection: 'column',
-  }
+  },
 }));
 
 export default function GroupsList({ open, setOpen }: GroupsListProps) {
-  const groupsState = useSelector<RootState, Group[] | null>((state: RootState) => state.groups);
+  const groupsState = useSelector<RootState, Group[] | null>(
+    (state: RootState) => state.groups
+  );
 
   const classes = useStyles();
 
-  const [groupCards] = useState([]);
+  const [groupCards, setGroupCards] = useState<JSX.Element[]>([]);
   const [showCreateGroupForm, setShowCreateGroupForm] = useState(false);
   const [groupToBeEdited, setGroupToBeEdited] = useState<null | Group>(null);
 
@@ -50,69 +52,83 @@ export default function GroupsList({ open, setOpen }: GroupsListProps) {
         <Card key={groupsState![i].uid}>
           <CardContent className={classes.cardContent}>
             <Typography>{groupsState![i].groupName}</Typography>
-            <Typography>Antal Medlemmar: {groupsState![i].groupMembers.length}</Typography>
+            <Typography>
+              Member count: {groupsState![i].groupMembers.length}
+            </Typography>
           </CardContent>
-          <IconButton onClick={() => {setShowCreateGroupForm(true); setGroupToBeEdited(groupsState![i])}}>
+          <IconButton
+            onClick={() => {
+              setShowCreateGroupForm(true);
+              setGroupToBeEdited(groupsState![i]);
+            }}
+          >
             <EditIcon />
           </IconButton>
         </Card>
       );
     }
-  }
+
+    setGroupCards(tempArr);
+  };
 
   useEffect(() => {
     if (groupsState) {
       generateGroupCards();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [groupsState]);
 
   return (
-    <Dialog 
-      open={open} 
+    <Dialog
+      open={open}
       onClose={() => {
         setOpen(false);
         setShowCreateGroupForm(false);
-      }} 
+      }}
       aria-labelledby='form-dialog-title'
       PaperProps={{
         style: {
           backgroundColor: '#333',
-          color: '#fff'
-        }
+          color: '#fff',
+        },
       }}
+      maxWidth='sm'
+      fullWidth
     >
-      {
-        showCreateGroupForm ? (
-          <GroupForm setShowCreateGroupForm={setShowCreateGroupForm} groupToBeEdited={groupToBeEdited} />
-        ) : (
-          <div>
-            <DialogContent>
-              {
-                groupsState ? groupCards : <Typography variant='h6'>Du har inga grupper</Typography>
-              }
-            </DialogContent>
-            <DialogActions>
-              <IconButton 
-                onClick={() => {
-                  setOpen(false);
-                }}
-                classes={{root: classes.root}}
-                className={classes.button}
-              >
-                <CloseIcon />
-              </IconButton>
-              <IconButton 
-                onClick={() => setShowCreateGroupForm(true)}
-                classes={{root: classes.root}}
-                className={classes.button}
-              >
-                <AddCircleOutlinedIcon />
-              </IconButton>
-            </DialogActions>
-          </div>
-        )
-      }
+      {showCreateGroupForm ? (
+        <GroupForm
+          setShowCreateGroupForm={setShowCreateGroupForm}
+          groupToBeEdited={groupToBeEdited}
+        />
+      ) : (
+        <div>
+          <DialogContent>
+            {groupsState ? (
+              groupCards
+            ) : (
+              <Typography variant='h6'>You have no groups</Typography>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <IconButton
+              onClick={() => {
+                setOpen(false);
+              }}
+              classes={{ root: classes.root }}
+              className={classes.button}
+            >
+              <CloseIcon />
+            </IconButton>
+            <IconButton
+              onClick={() => setShowCreateGroupForm(true)}
+              classes={{ root: classes.root }}
+              className={classes.button}
+            >
+              <AddCircleOutlinedIcon />
+            </IconButton>
+          </DialogActions>
+        </div>
+      )}
     </Dialog>
   );
 }

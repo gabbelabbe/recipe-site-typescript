@@ -147,7 +147,7 @@ export default function FoodItemForm({
           <TextField
             margin='dense'
             id='foodItem'
-            label={recipeInfo ? recipeInfo.foodItem : 'Maträtt'}
+            label={recipeInfo ? recipeInfo.foodItem : 'Dish'}
             type='text'
             fullWidth
             InputProps={{
@@ -165,7 +165,7 @@ export default function FoodItemForm({
               margin='dense'
               id='recipeLink'
               label={
-                !!recipeInfo ? recipeInfo.recipeLink : 'Länk till receptet'
+                !!recipeInfo ? recipeInfo.recipeLink : 'Recipe link'
               }
               type='text'
               fullWidth
@@ -191,7 +191,7 @@ export default function FoodItemForm({
               type='file'
             />
             <label htmlFor='icon-button-file'>
-              <Tooltip title='Ladda upp bild'>
+              <Tooltip title='Upload image'>
                 <IconButton
                   color='primary'
                   aria-label='upload picture'
@@ -237,10 +237,10 @@ export default function FoodItemForm({
             }}
             style={{ color: '#fff' }}
           >
-            Avbryt
+            Cancel
           </Button>
           <Button onClick={handleCreateRecipe} style={{ color: '#fff' }}>
-            {!!recipeInfo ? 'Uppdatera Recept' : 'Skapa Recept'}
+            {!!recipeInfo ? 'Update' : 'Create'}
           </Button>
         </DialogActions>
       </Dialog>

@@ -19,7 +19,7 @@ export default function Logout() {
   }
 
   return (
-    <Tooltip title='Logga Ut'>
+    <Tooltip title='Log out'>
       <IconButton edge='end' onClick={signOut} className={classes.logoutButton}>
         <AccountCircleOutlinedIcon color='inherit' />
       </IconButton>

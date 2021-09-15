@@ -53,7 +53,7 @@ export default function Header() {
       <Toolbar>
         <div />
         {userState ? (
-          <Tooltip title='Gå tillbaka en vecka'>
+          <Tooltip title='Go back'>
             <IconButton
               aria-label='back'
               style={{ color: '#fff' }}
@@ -70,11 +70,11 @@ export default function Header() {
         ) : null}
         <Typography variant='h6' className={classes.title}>
           {userState
-            ? 'Recept för vecka ' + getISOWeek(userState.selectedDate)
-            : 'Logga in för att se dina recept'}
+            ? 'Recipes for week ' + getISOWeek(userState.selectedDate)
+            : 'Log in to see your recipes'}
         </Typography>
         {userState ? (
-          <Tooltip title='Gå framåt en vecka'>
+          <Tooltip title='Go forward'>
             <IconButton
               aria-label='back'
               style={{ color: '#fff' }}

@@ -33,6 +33,7 @@ export const CHANGE_DATE = 'CHANGE_DATE';
 export const SET_GROUPS = 'SET_GROUPS';
 export const CLEAR_GROUPS = 'CLEAR_GROUPS';
 export const CHANGE_SELECTED_GROUP = 'CHANGE_SELECTED_GROUP';
+export const ADD_GROUP = 'ADD_GROUP';
 
 interface LoginAction {
   type: typeof LOGIN,
@@ -53,6 +54,11 @@ interface SetGroups {
   payload: Group[]
 }
 
+interface AddGroup {
+  type: typeof ADD_GROUP,
+  payload: Group
+}
+
 interface ClearGroups {
   type: typeof CLEAR_GROUPS
 }
@@ -63,4 +69,4 @@ interface ChangeSelectedGroup {
 }
 
 export type UserActionTypes = LoginAction | LogoutAction | ChangeDate | ChangeSelectedGroup;
-export type GroupsActionTypes = SetGroups | ClearGroups;
+export type GroupsActionTypes = SetGroups | ClearGroups | AddGroup;

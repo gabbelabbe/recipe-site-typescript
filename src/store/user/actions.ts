@@ -9,6 +9,7 @@ import {
   CLEAR_GROUPS,
   Group,
   GroupsActionTypes,
+  ADD_GROUP,
 } from './types';
 
 export function login(user: LoggedInUser): UserActionTypes {
@@ -35,6 +36,13 @@ export function setGroups(groups: Group[]): GroupsActionTypes {
   return {
     type: SET_GROUPS,
     payload: groups
+  }
+}
+
+export function AddGroup(group: Group): GroupsActionTypes {
+  return {
+    type: ADD_GROUP,
+    payload: group
   }
 }
 

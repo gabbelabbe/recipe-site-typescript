@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { firestore } from '../firebase';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { User, LoggedInUser } from '../store/user/types';
 import { RootState } from '../store/index';
 import { makeStyles } from '@material-ui/core/styles';
@@ -19,6 +19,7 @@ import InputBase from '@material-ui/core/InputBase';
 import Divider from '@material-ui/core/Divider';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Typography from '@material-ui/core/Typography';
+import { v4 as uuidv4 } from 'uuid';
 
 const useStyles = makeStyles((theme) => ({
   input: {
@@ -76,13 +77,18 @@ export default function GroupForm({
   let userRef:
     | firebase.firestore.CollectionReference<firebase.firestore.DocumentData>
     | undefined;
+  let groupRef:
+    | firebase.firestore.CollectionReference<firebase.firestore.DocumentData>
+    | undefined;
   const db = firestore();
 
+  const dispatch = useDispatch();
+
   const classes = useStyles();
-  const [groupName, setGroupName] = useState('');
-  const [groupMembers, setGroupMembers] = useState<User[]>([
-    { email: '', uid: '' },
-  ]);
+  const [groupName, setGroupName] = useState(groupToBeEdited?.groupName || '');
+  const [groupMembers, setGroupMembers] = useState<User[]>(
+    groupToBeEdited?.groupMembers || [{ email: '', uid: '' }]
+  );
 
   const handleEmailChange = (email: string, index: number) => {
     const tempGroupMembers = [...groupMembers];
@@ -109,7 +115,49 @@ export default function GroupForm({
   };
 
   const handleCreateGroup = () => {
-    console.log('Creating Group...');
+    groupRef = db.collection('groups');
+
+    const uuid = groupToBeEdited?.uid || uuidv4();
+
+    groupRef
+      .doc(uuid)
+      .get()
+      .then((querySnapshot) => {
+        if (!querySnapshot.exists) {
+          groupRef
+            ?.doc(uuid)
+            .set({
+              uid: uuid,
+              groupName,
+              groupMembers: [
+                ...groupMembers,
+                { email: userState?.email, uid: userState?.uid },
+              ],
+            })
+            .then(() =>
+              groupRef
+                ?.doc(uuid)
+                .get()
+                .then(async (res) => {
+                  const data = await res.data();
+                  if (data) {
+                    dispatch({
+                      type: 'ADD_GROUP',
+                      payload: data,
+                    });
+                    setShowCreateGroupForm(false);
+                  }
+                })
+            );
+        } /* else {
+          groupRef?.doc(uuid).update({
+            foodItem: newFoodItem,
+            recipeLink: newRecipeLink,
+            date: selectedDate,
+            week: getISOWeek(selectedDate),
+          });
+        } */
+      });
   };
 
   return (
@@ -118,7 +166,7 @@ export default function GroupForm({
         <TextField
           margin='dense'
           id='groupName'
-          label={groupToBeEdited ? groupToBeEdited.groupName : 'Gruppens Namn'}
+          label={groupToBeEdited ? groupToBeEdited.groupName : 'Group name'}
           type='text'
           fullWidth
           InputProps={{
@@ -131,7 +179,7 @@ export default function GroupForm({
           InputLabelProps={{ className: classes.label }}
         />
         <Typography style={{ paddingTop: 5 }}>
-          Personer som du vill bjuda in till gruppen:
+          People you want to invite:
         </Typography>
         {groupMembers.map((member, i) => {
           return (
@@ -144,7 +192,7 @@ export default function GroupForm({
               <InputBase
                 className={classes.inputOtherMembers}
                 id={`${i}`}
-                placeholder={member.email ? member.email : 'Mail till person'}
+                placeholder={member.email ? member.email : 'Email'}
                 margin='dense'
                 type='text'
                 value={member.email}

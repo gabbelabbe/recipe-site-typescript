@@ -27,7 +27,7 @@ export default function AddNewRecipe() {
 
   return (
     <>
-      <Tooltip title='Se dina grupper'>
+      <Tooltip title='View your groups'>
         <IconButton className={classes.absolute} onClick={handleClickOpen}>
           <GroupIcon color='inherit' />
         </IconButton>

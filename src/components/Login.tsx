@@ -22,7 +22,7 @@ export default function Login() {
   }
 
   return (
-    <Tooltip title='Logga In'>
+    <Tooltip title='Log in'>
       <IconButton
         edge='end'
         onClick={googleLogin}

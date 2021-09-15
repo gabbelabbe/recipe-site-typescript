@@ -47,7 +47,10 @@ function App() {
       groupsRef = db.collection('groups');
 
       unsubscribe = await groupsRef
-        .where('groupMembers', 'array-contains', user.uid)
+        .where('groupMembers', 'array-contains', {
+          email: user.email,
+          uid: user.uid,
+        })
         .onSnapshot(async (querySnapshot) => {
           const groups = querySnapshot.docs.map((doc) => doc.data());
           if (groups.length > 0) {
